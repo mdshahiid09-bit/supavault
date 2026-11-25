@@ -1,0 +1,82 @@
+name: Build & Release SupaVault APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Release SupaVault
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/app/supavault.keystore
+          KEYSTORE_PASSWORD: 'supavault123'
+          KEY_ALIAS: 'supavault'
+          KEY_PASSWORD: 'supavault123'
+        run: |
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Prepare APK Asset
+        id: prepare_asset
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+          else
+            TAG_NAME="v1.0.0"
+          fi
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+          APK_FILE=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            echo "Error: Release APK not found!"
+            exit 1
+          fi
+
+          DEST_NAME="SupaVault-${TAG_NAME}-release.apk"
+          cp "$APK_FILE" "$DEST_NAME"
+          echo "apk_path=${DEST_NAME}" >> $GITHUB_OUTPUT
+          echo "apk_name=${DEST_NAME}" >> $GITHUB_OUTPUT
+          echo "APK generated: $DEST_NAME"
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.prepare_asset.outputs.apk_name }}
+          path: ${{ steps.prepare_asset.outputs.apk_path }}
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.prepare_asset.outputs.apk_path }}
+          name: "SupaVault ${{ steps.prepare_asset.outputs.tag_name }}"
+          tag_name: ${{ steps.prepare_asset.outputs.tag_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
