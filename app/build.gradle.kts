@@ -15,13 +15,13 @@ android {
         applicationId = "com.supavault.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Default placeholder credentials (can be updated dynamically in-app or via local.properties)
-        buildConfigField("String", "DEFAULT_SUPABASE_URL", "\"https://your-project.supabase.co\"")
-        buildConfigField("String", "DEFAULT_SUPABASE_ANON_KEY", "\"your-anon-key\"")
+        // Pre-configured live Supabase project credentials
+        buildConfigField("String", "DEFAULT_SUPABASE_URL", "\"https://hkciawrgcqpometjlncb.supabase.co\"")
+        buildConfigField("String", "DEFAULT_SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrY2lhd3JnY3Fwb21ldGpsbmNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUzNTIyMjQsImV4cCI6MjExMDkyODIyNH0.Ne3q-0Z3V56cYm_L5aC4A4A7zVfnKMDhYgqlJnTJMnE\"")
         buildConfigField("String", "ADMIN_PASSWORD", "\"Admin@2026\"")
     }
 
