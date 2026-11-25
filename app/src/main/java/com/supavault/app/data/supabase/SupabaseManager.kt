@@ -161,7 +161,9 @@ object SupabaseManager {
             if (imageBytes != null && imageBytes.isNotEmpty()) {
                 val fileName = "img_${System.currentTimeMillis()}_${UUID.randomUUID().toString().take(8)}.$fileExtension"
                 val bucket = client.storage.from("vault_media")
-                bucket.upload(fileName, imageBytes, upsert = true)
+                bucket.upload(fileName, imageBytes) {
+                    upsert = true
+                }
                 imageUrl = bucket.publicUrl(fileName)
             }
 
@@ -211,7 +213,9 @@ object SupabaseManager {
             val testBytes = "Hello Supabase Storage from SupaVault Diagnostic Test!\nTimestamp: ${System.currentTimeMillis()}".toByteArray()
             val fileName = "diagnostic_test_${System.currentTimeMillis()}.txt"
             val bucket = client.storage.from("vault_media")
-            bucket.upload(fileName, testBytes, upsert = true)
+            bucket.upload(fileName, testBytes) {
+                upsert = true
+            }
             val publicUrl = bucket.publicUrl(fileName)
             Result.success(publicUrl)
         } catch (e: Exception) {
